@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,9 +16,9 @@ namespace FGOAudioDecoder
                 Console.WriteLine(
                     "------FGOAudioDecoder------\n" +
                     "1: cpk2wav(单文件)\t" +
-                    "2: cpk2wav(选择文件夹批量转换) - 待写\n" +
+                    "2: cpk2wav(选择文件夹批量转换)\n" +
                     "3: Usm2(m2v+wav)(单文件)\t" +
-                    "4: Usm2(m2v+wav)(选择文件夹批量转换) - 待写\n" +
+                    "4: Usm2(m2v+wav)(选择文件夹批量转换)\n" +
                     "999: 退出程序\n" +
                     "请选择功能..."
                 );
@@ -47,20 +46,36 @@ namespace FGOAudioDecoder
                         await DisplayMenu();
                         break;
                     case 2:
+                        Console.WriteLine("请将放有cpk文件的文件夹目录拖入窗口内获取路径,并按回车键:");
+                        var cpkfolderpath = Console.ReadLine();
+                        var cpkfolder = new DirectoryInfo(cpkfolderpath);
+                        foreach (var cpkfile in cpkfolder.GetFiles("*.cpk.bytes", SearchOption.AllDirectories))
+                            await Task.Run(async () => { await DecryptCpkFile(cpkfile, cpkfolder); });
+                        Thread.Sleep(1000);
+                        Console.WriteLine("解包完成,点击任意键继续...");
+                        Console.ReadKey(true);
+                        await DisplayMenu();
                         break;
                     case 3:
                         Console.WriteLine("请将Usm文件拖入窗口内获取路径,并按回车键:");
                         var filepathusm = Console.ReadLine();
                         var fileusm = new FileInfo(filepathusm);
-                        var outputfolderusm = fileusm.DirectoryName;
-                        var outputusm = new DirectoryInfo(outputfolderusm);
-                        FGOAudioDecoder.DecodeUsmFiles(fileusm, outputusm);
+                        FGOAudioDecoder.DecodeUsmFiles(fileusm);
                         Thread.Sleep(1000);
                         Console.WriteLine("解包完成,点击任意键继续...");
                         Console.ReadKey(true);
                         await DisplayMenu();
                         break;
                     case 4:
+                        Console.WriteLine("请将放有Usm文件的文件夹目录拖入窗口内获取路径,并按回车键:");
+                        var usmfolderpath = Console.ReadLine();
+                        var usmfolder = new DirectoryInfo(usmfolderpath);
+                        foreach (var usmfile in usmfolder.GetFiles("*.usm", SearchOption.AllDirectories))
+                            FGOAudioDecoder.DecodeUsmFiles(usmfile);
+                        Thread.Sleep(1000);
+                        Console.WriteLine("解包完成,点击任意键继续...");
+                        Console.ReadKey(true);
+                        await DisplayMenu();
                         break;
                     case 999:
                         return;
@@ -104,7 +119,6 @@ namespace FGOAudioDecoder
 
             await Task.Run(() => { FGOAudioDecoder.DecodeAcbFiles(new FileInfo(acbFilename), outputfolder); });
             Thread.Sleep(1500);
-            Process.Start(outputfolder.FullName + @"\DecodedWavs");
         }
 
         private static async Task Main(string[] args)

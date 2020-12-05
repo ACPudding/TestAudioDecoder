@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -58,6 +59,7 @@ namespace FGOAudioDecoder
             var acbfile = filename;
             var fs = new FileStream(acbfile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             var af = new CriAcbFile(fs, 0, false);
+            Console.WriteLine(filename.Name + " - 拆分acb文件...");
             af.ExtractAll();
             fs.Close();
             var destinationFolder = new DirectoryInfo(Path.Combine(acbfile.DirectoryName,
@@ -69,6 +71,7 @@ namespace FGOAudioDecoder
 
             Parallel.ForEach(destinationFolder.GetFiles("*.hca", SearchOption.AllDirectories), hcafile =>
             {
+                Console.WriteLine(hcafile.Name + " - 解密hca...");
                 using (var inputFileStream = File.Open(hcafile.FullName, FileMode.Open, FileAccess.Read))
                 {
                     using (var outputFileStream =
@@ -109,7 +112,7 @@ namespace FGOAudioDecoder
             Directory.Delete(destinationFolder.FullName, true);
         }
 
-        public static void DecodeUsmFiles(FileInfo filename, DirectoryInfo VideoFolder)
+        public static void DecodeUsmFiles(FileInfo filename)
         {
             var volume = 1F;
             var mode = 16;
@@ -119,6 +122,7 @@ namespace FGOAudioDecoder
             var path = Directory.GetCurrentDirectory();
             var cridCommands = " -a 92EBF464 -b 7E896318 -v -n \"" +
                                filename.FullName + "\"";
+            Console.WriteLine(filename.Name + " - 解密m2v文件...");
             var process = new Process
             {
                 StartInfo =
@@ -144,6 +148,7 @@ namespace FGOAudioDecoder
                 if (!hcafile.Name.Contains(filename.Name.Substring(0, filename.Name.Length - 4))) continue;
                 using (var inputFileStream = File.Open(hcafile.FullName, FileMode.Open, FileAccess.Read))
                 {
+                    Console.WriteLine(hcafile.Name + " - 解密hca...");
                     using (var outputFileStream =
                         File.Open(
                             filename.DirectoryName + @"\" + filename.Name.Substring(0, filename.Name.Length - 4) +
@@ -191,6 +196,7 @@ namespace FGOAudioDecoder
                                  " -c:v copy -c:a aac -strict experimental " + "\"" + filename.DirectoryName + @"\" +
                                  filename.Name.Substring(0, filename.Name.Length - 4) + @".demux\" +
                                  filename.Name.Substring(0, filename.Name.Length - 4) + "_final.mp4" + "\"";
+            Console.WriteLine(filename.Name + " - 合并m2v、wav文件...");
             var process2 = new Process
             {
                 StartInfo =
