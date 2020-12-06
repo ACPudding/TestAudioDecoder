@@ -35,7 +35,7 @@ namespace FGOAudioDecoder
                 {
                     case 1:
                         Console.WriteLine("请将cpk文件拖入窗口内获取路径,并按回车键:");
-                        var filepath = Console.ReadLine();
+                        var filepath = Console.ReadLine().Replace("\"","");
                         var file = new FileInfo(filepath);
                         var outputfolder = file.DirectoryName;
                         var output = new DirectoryInfo(outputfolder);
@@ -47,7 +47,7 @@ namespace FGOAudioDecoder
                         break;
                     case 2:
                         Console.WriteLine("请将放有cpk文件的文件夹目录拖入窗口内获取路径,并按回车键:");
-                        var cpkfolderpath = Console.ReadLine();
+                        var cpkfolderpath = Console.ReadLine().Replace("\"", "");
                         var cpkfolder = new DirectoryInfo(cpkfolderpath);
                         foreach (var cpkfile in cpkfolder.GetFiles("*.cpk.bytes", SearchOption.AllDirectories))
                             await Task.Run(async () => { await DecryptCpkFile(cpkfile, cpkfolder); });
@@ -58,7 +58,7 @@ namespace FGOAudioDecoder
                         break;
                     case 3:
                         Console.WriteLine("请将Usm文件拖入窗口内获取路径,并按回车键:");
-                        var filepathusm = Console.ReadLine();
+                        var filepathusm = Console.ReadLine().Replace("\"", "");
                         var fileusm = new FileInfo(filepathusm);
                         FGOAudioDecoder.DecodeUsmFiles(fileusm);
                         Thread.Sleep(1000);
@@ -68,7 +68,7 @@ namespace FGOAudioDecoder
                         break;
                     case 4:
                         Console.WriteLine("请将放有Usm文件的文件夹目录拖入窗口内获取路径,并按回车键:");
-                        var usmfolderpath = Console.ReadLine();
+                        var usmfolderpath = Console.ReadLine().Replace("\"", "");
                         var usmfolder = new DirectoryInfo(usmfolderpath);
                         foreach (var usmfile in usmfolder.GetFiles("*.usm", SearchOption.AllDirectories))
                             FGOAudioDecoder.DecodeUsmFiles(usmfile);
