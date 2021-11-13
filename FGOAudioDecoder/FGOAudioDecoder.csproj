@@ -36,17 +36,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DereTore.Common">
-      <HintPath>..\..\FGOSBIAReloaded\FGOSBIAReloaded\DereTore.Common.dll</HintPath>
+      <HintPath>..\..\TestProjectReloaded\FGOSBIAReloaded\DereTore.Common.dll</HintPath>
     </Reference>
     <Reference Include="DereTore.Exchange.Audio.HCA">
-      <HintPath>..\..\FGOSBIAReloaded\FGOSBIAReloaded\DereTore.Exchange.Audio.HCA.dll</HintPath>
+      <HintPath>..\..\TestProjectReloaded\FGOSBIAReloaded\DereTore.Exchange.Audio.HCA.dll</HintPath>
     </Reference>
     <Reference Include="DereTore.Interop.OS">
-      <HintPath>..\..\FGOSBIAReloaded\FGOSBIAReloaded\DereTore.Interop.OS.dll</HintPath>
+      <HintPath>..\..\TestProjectReloaded\FGOSBIAReloaded\DereTore.Interop.OS.dll</HintPath>
     </Reference>
     <Reference Include="format, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>J:\MusicExtract\VGM_TOOLS\lib\format.dll</HintPath>
+      <HintPath>..\..\TestProjectReloaded\FGOSBIAReloaded\format.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -58,7 +58,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="vgmtutil, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>J:\MusicExtract\VGM_TOOLS\lib\vgmtutil.dll</HintPath>
+      <HintPath>..\..\TestProjectReloaded\FGOSBIAReloaded\vgmtutil.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

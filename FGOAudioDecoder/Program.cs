@@ -7,6 +7,8 @@ namespace FGOAudioDecoder
 {
     internal class Program
     {
+        private static string[] arguments;
+
         private static async Task DisplayMenu()
         {
             Console.Clear();
@@ -22,60 +24,103 @@ namespace FGOAudioDecoder
                     "999: 退出程序\n" +
                     "请选择功能..."
                 );
-                try
+
+                if (arguments == null)
                 {
-                    arg = Convert.ToInt32(Console.ReadLine());
+                    try
+                    {
+                        arg = Convert.ToInt32(Console.ReadLine());
+                    }
+                    catch (Exception)
+                    {
+                        arg = -1;
+                    }
                 }
-                catch (Exception)
+                else
                 {
-                    arg = -1;
+                    arg = Convert.ToInt32(arguments[1]);
+                    Console.WriteLine(arg);
                 }
 
                 switch (arg)
                 {
                     case 1:
-                        Console.WriteLine("请将cpk文件拖入窗口内获取路径,并按回车键:");
-                        var filepath = Console.ReadLine().Replace("\"","");
-                        var file = new FileInfo(filepath);
-                        var outputfolder = file.DirectoryName;
-                        var output = new DirectoryInfo(outputfolder);
-                        await Task.Run(async () => { await DecryptCpkFile(file, output); });
-                        Thread.Sleep(1000);
-                        Console.WriteLine("解包完成,点击任意键继续...");
-                        Console.ReadKey(true);
-                        await DisplayMenu();
+                        while (arguments == null)
+                        {
+                            Console.WriteLine("请将cpk文件拖入窗口内获取路径,并按回车键:");
+                            var filepath = Console.ReadLine().Replace("\"", "");
+                            var file = new FileInfo(filepath);
+                            var outputfolder = file.DirectoryName;
+                            var output = new DirectoryInfo(outputfolder);
+                            await Task.Run(async () => { await DecryptCpkFile(file, output); });
+                            Thread.Sleep(1000);
+                            Console.WriteLine("解包完成,点击任意键继续...");
+                            Console.ReadKey(true);
+                            await DisplayMenu();
+                        }
+
                         break;
                     case 2:
+                        while (arguments == null)
+                        {
+                            Console.WriteLine("请将放有cpk文件的文件夹目录拖入窗口内获取路径,并按回车键:");
+                            var cpkfolderpath = Console.ReadLine().Replace("\"", "");
+                            var cpkfolder = new DirectoryInfo(cpkfolderpath);
+                            foreach (var cpkfile in cpkfolder.GetFiles("*.cpk.bytes", SearchOption.AllDirectories))
+                                await Task.Run(async () => { await DecryptCpkFile(cpkfile, cpkfolder); });
+                            Thread.Sleep(1000);
+                            Console.WriteLine("解包完成,点击任意键继续...");
+                            Console.ReadKey(true);
+                            await DisplayMenu();
+                            break;
+                        }
+
                         Console.WriteLine("请将放有cpk文件的文件夹目录拖入窗口内获取路径,并按回车键:");
-                        var cpkfolderpath = Console.ReadLine().Replace("\"", "");
-                        var cpkfolder = new DirectoryInfo(cpkfolderpath);
-                        foreach (var cpkfile in cpkfolder.GetFiles("*.cpk.bytes", SearchOption.AllDirectories))
-                            await Task.Run(async () => { await DecryptCpkFile(cpkfile, cpkfolder); });
+                        var cpkfolderpathquick = arguments[0];
+                        Console.WriteLine(cpkfolderpathquick);
+                        var cpkfolderquick = new DirectoryInfo(cpkfolderpathquick);
+                        foreach (var cpkfile2 in cpkfolderquick.GetFiles("*.cpk.bytes", SearchOption.AllDirectories))
+                            await Task.Run(async () => { await DecryptCpkFile(cpkfile2, cpkfolderquick); });
                         Thread.Sleep(1000);
                         Console.WriteLine("解包完成,点击任意键继续...");
-                        Console.ReadKey(true);
-                        await DisplayMenu();
                         break;
                     case 3:
-                        Console.WriteLine("请将Usm文件拖入窗口内获取路径,并按回车键:");
-                        var filepathusm = Console.ReadLine().Replace("\"", "");
-                        var fileusm = new FileInfo(filepathusm);
-                        FGOAudioDecoder.DecodeUsmFiles(fileusm);
-                        Thread.Sleep(1000);
-                        Console.WriteLine("解包完成,点击任意键继续...");
-                        Console.ReadKey(true);
-                        await DisplayMenu();
+                        while (arguments == null)
+                        {
+                            Console.WriteLine("请将Usm文件拖入窗口内获取路径,并按回车键:");
+                            var filepathusm = Console.ReadLine().Replace("\"", "");
+                            var fileusm = new FileInfo(filepathusm);
+                            FGOAudioDecoder.DecodeUsmFiles(fileusm);
+                            Thread.Sleep(1000);
+                            Console.WriteLine("解包完成,点击任意键继续...");
+                            Console.ReadKey(true);
+                            await DisplayMenu();
+                        }
+
                         break;
                     case 4:
+                        while (arguments == null)
+                        {
+                            Console.WriteLine("请将放有Usm文件的文件夹目录拖入窗口内获取路径,并按回车键:");
+                            var usmfolderpath = Console.ReadLine().Replace("\"", "");
+                            var usmfolder = new DirectoryInfo(usmfolderpath);
+                            foreach (var usmfile in usmfolder.GetFiles("*.usm", SearchOption.AllDirectories))
+                                FGOAudioDecoder.DecodeUsmFiles(usmfile);
+                            Thread.Sleep(1000);
+                            Console.WriteLine("解包完成,点击任意键继续...");
+                            Console.ReadKey(true);
+                            await DisplayMenu();
+                            break;
+                        }
+
                         Console.WriteLine("请将放有Usm文件的文件夹目录拖入窗口内获取路径,并按回车键:");
-                        var usmfolderpath = Console.ReadLine().Replace("\"", "");
-                        var usmfolder = new DirectoryInfo(usmfolderpath);
-                        foreach (var usmfile in usmfolder.GetFiles("*.usm", SearchOption.AllDirectories))
-                            FGOAudioDecoder.DecodeUsmFiles(usmfile);
+                        var usmfolderpathQuick = arguments[0];
+                        Console.WriteLine(usmfolderpathQuick);
+                        var usmfolderQuick = new DirectoryInfo(usmfolderpathQuick);
+                        foreach (var usmfile2 in usmfolderQuick.GetFiles("*.usm", SearchOption.AllDirectories))
+                            FGOAudioDecoder.DecodeUsmFiles(usmfile2);
                         Thread.Sleep(1000);
                         Console.WriteLine("解包完成,点击任意键继续...");
-                        Console.ReadKey(true);
-                        await DisplayMenu();
                         break;
                     case 999:
                         return;
@@ -128,9 +173,14 @@ namespace FGOAudioDecoder
                 ExtractExe.ExtractResFile("FGOAudioDecoder.Application.crid.exe", path + @"\crid.exe");
             if (!File.Exists(path + @"\ffmpeg.exe"))
                 ExtractExe.ExtractResFile("FGOAudioDecoder.Application.ffmpeg.exe", path + @"\ffmpeg.exe");
+            if (args.Length != 0)
+                arguments = args;
             await DisplayMenu();
-            Console.WriteLine("点按任意键退出...");
-            Console.ReadKey(true);
+            while (arguments == null)
+            {
+                Console.WriteLine("点按任意键退出...");
+                Console.ReadKey(true);
+            }
         }
     }
 }
