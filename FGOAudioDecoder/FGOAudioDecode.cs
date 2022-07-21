@@ -210,5 +210,55 @@ namespace FGOAudioDecoder
             process2.Start();
             process2.WaitForExit();
         }
+
+        public static void DecodeBGOSpecialUsmFiles(FileInfo filename)
+        {
+            var volume = 1F;
+            var mode = 16;
+            var loop = 0;
+            var ciphKey1 = 0x92EBF464;
+            uint ciphKey2 = 0x7E896318;
+            var path = Directory.GetCurrentDirectory();
+            var cridCommands = " -a 92EBF464 -b 7E896318 -v -n -c \"" +
+                               filename.FullName + "\"";
+            Console.WriteLine(filename.Name + " - 解密m2v文件...");
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = path + @"\crid.exe",
+                    Arguments = cridCommands,
+                    UseShellExecute = true,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            process.WaitForExit();
+            var m2vfiles = new DirectoryInfo(filename.DirectoryName + @"\" +
+                                             filename.Name.Substring(0, filename.Name.Length - 4) + @".demux\")
+                .GetFiles("*.m2v", SearchOption.AllDirectories);
+            var m2vfile = m2vfiles[0];
+            var wavfiles = new DirectoryInfo(filename.DirectoryName + @"\" +
+                                             filename.Name.Substring(0, filename.Name.Length - 4) + @".demux\")
+                .GetFiles("*.wav", SearchOption.AllDirectories);
+            var wavefile = wavfiles[0];
+            var ffmpegCommands = "-i " + "\"" + m2vfile.FullName + "\"" + " -i " + "\"" + wavefile.FullName + "\"" +
+                                 " -c:v libx264 -c:a aac -strict experimental " + "\"" + filename.DirectoryName + @"\" +
+                                 filename.Name.Substring(0, filename.Name.Length - 4) + @".demux\" +
+                                 filename.Name.Substring(0, filename.Name.Length - 4) + "_final.mp4" + "\"";
+            Console.WriteLine(filename.Name + " - 合并m2v、wav文件...");
+            var process2 = new Process
+            {
+                StartInfo =
+                {
+                    FileName = path + @"\ffmpeg.exe",
+                    Arguments = ffmpegCommands,
+                    UseShellExecute = true,
+                    CreateNoWindow = true
+                }
+            };
+            process2.Start();
+            process2.WaitForExit();
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace FGOAudioDecoder
                     "2: cpk2wav(选择文件夹批量转换)\n" +
                     "3: Usm2(m2v+wav)(单文件)\t" +
                     "4: Usm2(m2v+wav)(选择文件夹批量转换)\n" +
+                    "5: Usm2(m2v+wav)(国服自打包用的不同格式，仅供选项3、4发生失败时单独使用)\n" +
                     "999: 退出程序\n" +
                     "请选择功能..."
                 );
@@ -121,6 +122,19 @@ namespace FGOAudioDecoder
                             FGOAudioDecoder.DecodeUsmFiles(usmfile2);
                         Thread.Sleep(1000);
                         Console.WriteLine("解包完成,点击任意键继续...");
+                        break;
+                    case 5:
+                        while (arguments == null)
+                        {
+                            Console.WriteLine("请将Usm文件拖入窗口内获取路径,并按回车键:");
+                            var filepathusm = Console.ReadLine().Replace("\"", "");
+                            var fileusm = new FileInfo(filepathusm);
+                            FGOAudioDecoder.DecodeBGOSpecialUsmFiles(fileusm);
+                            Thread.Sleep(1000);
+                            Console.WriteLine("解包完成,点击任意键继续...");
+                            Console.ReadKey(true);
+                            await DisplayMenu();
+                        }
                         break;
                     case 999:
                         return;
