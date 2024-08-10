@@ -15,6 +15,18 @@ namespace FGOAudioDecoder
             try
             {
                 int arg;
+                /*Console.WriteLine(
+                    "------FGOAudioDecoder------\n" +
+                    "1: cpk2wav(单文件)\t" +
+                    "2: cpk2wav(选择文件夹批量转换)\n" +
+                    "3: Usm2(m2v+wav)(单文件)\t" +
+                    "4: Usm2(m2v+wav)(选择文件夹批量转换)\n" +
+                    "5: Usm2(m2v+wav)(国服自打包用的不同格式，仅供选项3、4发生失败时单独使用)\n" +
+                    "6: DebugMode\n" +
+                    "999: 退出程序\n" +
+                    "请选择功能..."
+                );*/
+
                 Console.WriteLine(
                     "------FGOAudioDecoder------\n" +
                     "1: cpk2wav(单文件)\t" +
@@ -136,6 +148,21 @@ namespace FGOAudioDecoder
                             await DisplayMenu();
                         }
                         break;
+                    /*case 6:
+                        while (arguments == null)
+                        {
+                            Console.WriteLine("请将cpk文件拖入窗口内获取路径,并按回车键:");
+                            var filepath = Console.ReadLine().Replace("\"", "");
+                            var file = new FileInfo(filepath);
+                            var outputfolder = file.DirectoryName;
+                            var output = new DirectoryInfo(outputfolder);
+                            DecryptCpkFileDebug(file, output);
+                            Thread.Sleep(1000);
+                            Console.WriteLine("解包完成,点击任意键继续...");
+                            Console.ReadKey(true);
+                            await DisplayMenu();
+                        }
+                        break;*/
                     case 999:
                         return;
                     default:
@@ -177,6 +204,28 @@ namespace FGOAudioDecoder
             }
 
             await Task.Run(() => { FGOAudioDecoder.DecodeAcbFiles(new FileInfo(acbFilename), outputfolder); });
+            Thread.Sleep(1500);
+        }
+
+        private static void DecryptCpkFileDebug(FileInfo file, DirectoryInfo outputfolder)
+        {
+            Console.WriteLine("解包音频: " + file.Name);
+            var acbFilename = "";
+            try
+            {
+                acbFilename = FGOAudioDecoder.UnpackCpkFiles(file, outputfolder);
+            }
+            catch (Exception)
+            {
+                //ignore
+            }
+            if (acbFilename == "")
+            {
+                Console.WriteLine("该文件不是cpk类型文件.请重试.");
+                return;
+            }
+
+            FGOAudioDecoder.DecodeAcbFilesDebug(new FileInfo(acbFilename), outputfolder);
             Thread.Sleep(1500);
         }
 
