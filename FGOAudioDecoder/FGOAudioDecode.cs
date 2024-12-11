@@ -143,10 +143,18 @@ public static class FGOAudioDecoder
         var dir2 = new DirectoryInfo(AudioFolder.FullName + @"\DecodedWavs\");
         var acbfile = filename;
         var fs = new FileStream(acbfile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        var af = new CriAcbFile(fs, 0, false);
-        Console.WriteLine(filename.Name + " - 拆分acb文件...");
-        af.ExtractAll();
-        fs.Close();
+        try
+        {
+            var af = new CriAcbFile(fs, 0, false);
+            Console.WriteLine(filename.Name + " - 拆分acb文件...");
+            af.ExtractAll();
+            fs.Close();
+        }
+        catch (Exception)
+        {
+            Console.WriteLine($"{Path.GetFileNameWithoutExtension(acbfile.FullName)} - 文件内有多个wav,解包时间会较长.");
+            fs.Close();
+        }
         var awbfilename = acbfile.FullName.Substring(0, acbfile.FullName.Length - 4) + ".awb";
         var destinationFolder = new DirectoryInfo(Path.Combine(acbfile.DirectoryName,
             "_vgmt_acb_ext_" + Path.GetFileNameWithoutExtension(acbfile.FullName)));
@@ -180,7 +188,14 @@ public static class FGOAudioDecoder
         Console.WriteLine($"{Path.GetFileNameWithoutExtension(acbfile.FullName)} - 使用vgmstream工具解包完成.");
         File.Delete(acbfile.FullName);
         File.Delete(awbfilename);
-        Directory.Delete(destinationFolder.FullName, true);
+        try
+        {
+            Directory.Delete(destinationFolder.FullName, true);
+        }
+        catch (Exception)
+        {
+            //ignore
+        }
     }
 
     public static void DecodeUsmFiles(FileInfo filename)
