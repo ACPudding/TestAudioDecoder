@@ -47,7 +47,7 @@ public static class FGOAudioDecoder
         return filefullname;
     }
 
-    public static void DecodeAcbFiles(FileInfo filename, DirectoryInfo AudioFolder)
+    public static void DecodeAcbFiles(FileInfo filename, DirectoryInfo AudioFolder) //已弃用，全面转换vgmstream
     {
         var volume = 1F;
         var mode = 16;
@@ -137,13 +137,8 @@ public static class FGOAudioDecoder
         Directory.Delete(destinationFolder.FullName, true);
     }
 
-    public static void DecodeAcbFilesDebug(FileInfo filename, DirectoryInfo AudioFolder)
+    public static void DecodeAcbFilesNew(FileInfo filename, DirectoryInfo AudioFolder)
     {
-        var volume = 1F;
-        var mode = 16;
-        var loop = 0;
-        var ciphKey1 = 0x92EBF464;
-        uint ciphKey2 = 0x7E896318;
         var dir = AudioFolder;
         var dir2 = new DirectoryInfo(AudioFolder.FullName + @"\DecodedWavs\");
         var acbfile = filename;
@@ -152,113 +147,37 @@ public static class FGOAudioDecoder
         Console.WriteLine(filename.Name + " - 拆分acb文件...");
         af.ExtractAll();
         fs.Close();
+        var awbfilename = acbfile.FullName.Substring(0, acbfile.FullName.Length - 4) + ".awb";
         var destinationFolder = new DirectoryInfo(Path.Combine(acbfile.DirectoryName,
             "_vgmt_acb_ext_" + Path.GetFileNameWithoutExtension(acbfile.FullName)));
         var OutFolder =
             Path.Combine(Path.GetDirectoryName(acbfile.FullName.Replace(dir.FullName, dir2.FullName)),
                 Path.GetFileNameWithoutExtension(acbfile.FullName));
         Directory.CreateDirectory(OutFolder);
-        foreach (var hcafile in destinationFolder.GetFiles("*.hca", SearchOption.AllDirectories))
+        Console.WriteLine($"{Path.GetFileNameWithoutExtension(acbfile.FullName)} - 正在唤起vgmstream...");
+        var path = Directory.GetCurrentDirectory();
+        if (!File.Exists(path + @"\vgmstream-cli.exe"))
         {
-            Console.WriteLine(hcafile.Name + " - 解密hca...");
-            try
-            {
-                using var inputFileStream = File.Open(hcafile.FullName, FileMode.Open, FileAccess.Read);
-                using var outputFileStream =
-                    File.Open(OutFolder + @"\" + hcafile.Name.Substring(0, hcafile.Name.Length - 4) + ".wav",
-                        FileMode.Create, FileAccess.Write);
-                var decodeParams = DecodeParams.CreateDefault();
-                decodeParams.Key1 = ciphKey1;
-                decodeParams.Key2 = ciphKey2;
-                decodeParams.KeyModifier = 0;
-
-                var audioParams = AudioParams.CreateDefault();
-
-                audioParams.InfiniteLoop = AudioParams.Default.InfiniteLoop;
-                audioParams.SimulatedLoopCount = AudioParams.Default.SimulatedLoopCount;
-                audioParams.OutputWaveHeader = true;
-
-                using var hcaStream = new HcaAudioStream(inputFileStream, decodeParams, audioParams);
-                var read = 1;
-                var dataBuffer = new byte[1024];
-
-                while (read > 0)
-                {
-                    read = hcaStream.Read(dataBuffer, 0, dataBuffer.Length);
-
-                    if (read > 0) outputFileStream.Write(dataBuffer, 0, read);
-                }
-            }
-            catch (Exception)
-            {
-                File.Delete(OutFolder + @"\" + hcafile.Name.Substring(0, hcafile.Name.Length - 4) + ".wav");
-                Console.WriteLine(hcafile.Name + " - 解密时遇到错误.该文件为Criware v1.30+的打包版本，正在唤起vgmstream...");
-                var path = Directory.GetCurrentDirectory();
-                if (!File.Exists(path + @"\vgmstream-cli.exe"))
-                {
-                    Console.WriteLine(hcafile.Name +
-                                      " - 唤起失败!请前往\"https://vgmstream.org/\"下载Command-line (64-bit) Win版本后解压至软件目录.");
-                    break;
-                }
-
-                var vgmStreamCommands =
-                    $"-o {OutFolder + @"\" + Path.GetFileNameWithoutExtension(hcafile.FullName)}.wav {hcafile.FullName}";
-                var process = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = path + @"\vgmstream-cli.exe",
-                        Arguments = vgmStreamCommands,
-                        UseShellExecute = true,
-                        CreateNoWindow = true
-                    }
-                };
-                process.Start();
-                process.WaitForExit();
-                Console.WriteLine(hcafile.Name + " - 使用vgmstream工具解包完成.");
-            }
-
-            File.Delete(hcafile.FullName);
+            Console.WriteLine(
+                $"{Path.GetFileNameWithoutExtension(acbfile.FullName)} - 唤起失败!请前往\"https://vgmstream.org/\"下载Command-line (64-bit) Win版本后解压至软件目录.");
+            return;
         }
 
-        /*Parallel.ForEach(destinationFolder.GetFiles("*.hca", SearchOption.AllDirectories), hcafile =>
+        var vgmStreamCommands =
+            $"{awbfilename} -S 0 -o {OutFolder}\\?n.wav";
+        var process = new Process
         {
-            Console.WriteLine(hcafile.Name + " - 解密hca...");
-            using (var inputFileStream = File.Open(hcafile.FullName, FileMode.Open, FileAccess.Read))
+            StartInfo =
             {
-                using (var outputFileStream =
-                    File.Open(OutFolder + @"\" + hcafile.Name.Substring(0, hcafile.Name.Length - 4) + ".wav",
-                        FileMode.Create, FileAccess.Write))
-                {
-                    var decodeParams = DecodeParams.CreateDefault();
-                    decodeParams.Key1 = ciphKey1;
-                    decodeParams.Key2 = ciphKey2;
-                    decodeParams.KeyModifier = 0;
-
-                    var audioParams = AudioParams.CreateDefault();
-
-                    audioParams.InfiniteLoop = AudioParams.Default.InfiniteLoop;
-                    audioParams.SimulatedLoopCount = AudioParams.Default.SimulatedLoopCount;
-                    audioParams.OutputWaveHeader = true;
-
-                    using (var hcaStream = new HcaAudioStream(inputFileStream, decodeParams, audioParams))
-                    {
-                        var read = 1;
-                        var dataBuffer = new byte[1024];
-
-                        while (read > 0)
-                        {
-                            read = hcaStream.Read(dataBuffer, 0, dataBuffer.Length);
-
-                            if (read > 0) outputFileStream.Write(dataBuffer, 0, read);
-                        }
-                    }
-                }
+                FileName = path + @"\vgmstream-cli.exe",
+                Arguments = vgmStreamCommands,
+                UseShellExecute = true,
+                CreateNoWindow = true
             }
-
-            File.Delete(hcafile.FullName);
-        });*/
-        var awbfilename = acbfile.FullName.Substring(0, acbfile.FullName.Length - 4) + ".awb";
+        };
+        process.Start();
+        process.WaitForExit();
+        Console.WriteLine($"{Path.GetFileNameWithoutExtension(acbfile.FullName)} - 使用vgmstream工具解包完成.");
         File.Delete(acbfile.FullName);
         File.Delete(awbfilename);
         Directory.Delete(destinationFolder.FullName, true);
