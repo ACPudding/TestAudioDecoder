@@ -65,7 +65,7 @@ internal class Program
                         var file = new FileInfo(filepath);
                         var outputfolder = file.DirectoryName;
                         var output = new DirectoryInfo(outputfolder);
-                        DecryptCpkFileNew(file, output);
+                        await DecryptCpkFileNew(file, output);
                         Thread.Sleep(1000);
                         Console.WriteLine("解包完成,点击任意键继续...");
                         Console.ReadKey(true);
